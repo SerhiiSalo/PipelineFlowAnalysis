@@ -24,15 +24,3 @@ class DataHandler:
         """
         self.data = pd.read_csv(file_name)
         print(f"Дані завантажено з файлу: {file_name}")
-
-    def calculate_deltas(self, sensors, logger):
-        """
-        Обчислює дельти для кожного сенсора та логує їх.
-        """
-        if self.data is None:
-            print("Дані ще не згенеровані.")
-            return
-
-        for sensor in sensors:
-            self.data[f"Delta_Pressure_{sensor}m"] = self.data[f"Pressure_{sensor}m"].diff().fillna(0)
-            logger.log(f"Дельти для сенсора {sensor} м обчислено.")

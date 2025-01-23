@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+
 class Pipeline:
     """
     Клас для моделювання трубопроводу та генерації даних потоку.

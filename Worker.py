@@ -1,3 +1,4 @@
+import os
 from DataHandler import DataHandler
 from TheftEvent import TheftEvent
 from Event import Event
@@ -11,6 +12,14 @@ from enum import Enum
 class EventType(Enum):
     ACCIDENT = "accident"
     THEFT = "theft"
+
+# Функція для підготовки середовища
+def prepare_environment():
+    if not os.path.exists("Data"):
+        os.mkdir("Data")
+    else:
+        for file in os.listdir("Data"):
+            os.remove(os.path.join("Data", file))
 
 
 
@@ -34,14 +43,14 @@ pipeline = Pipeline(
 # Генерація нормального потоку
 pipeline.generate_normal_flow(time_steps=100, noise_level=0.01)
 handler.data = pipeline.data
-handler.save_data("Pipeline_Normal_Flow.csv")
+handler.save_data("Data/Pipeline_Normal_Flow.csv")
 
 # Генерація місця події
 event_generator = EventGenerator(pipeline_length=300_000, sensors=pipeline.sensors, min_distance_from_sensors=5000, logger=logger)
 event_position = event_generator.generate_event_position()
 
 # Завантаження даних
-handler.load_data("Pipeline_Normal_Flow.csv")
+handler.load_data("Data/Pipeline_Normal_Flow.csv")
 
 # Вибір типу події
 event_type = EventType.ACCIDENT
@@ -53,7 +62,7 @@ if event_type == EventType.ACCIDENT:
 elif event_type == EventType.THEFT:
     simulator.apply_pressure_wave(event_position=event_position, pressure_increase=5)
 
-handler.save_data("Pipeline_Event_Simulation.csv")
+handler.save_data("Data/Pipeline_Event_Simulation.csv")
 
 # Візуалізація
 visualizer = Visualization(handler)
