@@ -1,7 +1,5 @@
 import os
 from DataHandler import DataHandler
-from TheftEvent import TheftEvent
-from Event import Event
 from Pipeline import Pipeline
 from Visualization import Visualization
 from PressureWaveSimulator import PressureWaveSimulator
