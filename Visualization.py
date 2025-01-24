@@ -52,3 +52,50 @@ class Visualization:
 
         plt.tight_layout()
         plt.show()
+
+    def plot_single_iteration(self, sensors):
+        """
+        Будує графіки для одиничної ітерації (тиск і витрата) у вигляді лінійних графіків.
+
+        Parameters:
+        - sensors (list): Позиції сенсорів.
+        """
+        data = self.data_handler.data
+        if data is None or len(data) != 1:
+            print("Дані для одиничної ітерації відсутні або некоректні.")
+            return
+
+        plt.figure(figsize=(14, 8))
+
+        # Графік тиску
+        plt.subplot(2, 1, 1)
+        for sensor in sensors:
+            plt.plot(
+                [0],  # Симуляція одного моменту часу
+                [data[f"Pressure_{sensor}m"].iloc[0]],
+                marker="o",
+                label=f"Тиск на {sensor} м",
+            )
+        plt.title("Тиск для одиничної ітерації")
+        plt.ylabel("Тиск (атм)")
+        plt.xlabel("Час (умовний)")
+        plt.legend()
+        plt.grid(True)
+
+        # Графік витрати
+        plt.subplot(2, 1, 2)
+        for sensor in sensors:
+            plt.plot(
+                [0],
+                [data[f"FlowRate_{sensor}m"].iloc[0]],
+                marker="o",
+                label=f"Витрата на {sensor} м",
+            )
+        plt.title("Витрата для одиничної ітерації")
+        plt.ylabel("Витрата (м³/с)")
+        plt.xlabel("Час (умовний)")
+        plt.legend()
+        plt.grid(True)
+
+        plt.tight_layout()
+        plt.show()
