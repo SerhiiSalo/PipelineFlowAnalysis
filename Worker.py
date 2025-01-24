@@ -7,26 +7,21 @@ from Logger import Logger
 from EventGenerator import EventGenerator
 from enum import Enum
 import random
+import time
 
 class EventType(Enum):
     ACCIDENT = "accident"
-
-# Функція для підготовки середовища
-def prepare_environment():
-    """
-    Підготовка середовища для зберігання даних симуляції.
-    """
-    if not os.path.exists("Data"):
-        os.mkdir("Data")
-    else:
-        for file in os.listdir("Data"):
-            os.remove(os.path.join("Data", file))
 
 class Worker:
     """
     Клас для виконання основних симуляцій та моделювання подій у трубопроводі.
     """
-    def __init__(self, logger=None):
+    def __init__(self, logger=None, storage_mode="overwrite"):
+        """
+        Parameters:
+        - logger: Об'єкт для логування.
+        - storage_mode: Режим зберігання даних ("overwrite", "append", "separate").
+        """
         self.logger = logger if logger else Logger("simulation_log.txt")
         self.sensors = [0, 100_000, 250_000, 300_000]
         self.handler = DataHandler()
@@ -37,18 +32,33 @@ class Worker:
             pressure_norm=34.0,
             flow_rate_norm=3.5
         )
+        self.storage_mode = storage_mode
+
+
+    def save_data(self, file_name):
+        """
+        Зберігає дані в залежності від обраного режиму.
+        """
+        if self.storage_mode == "separate":
+            output_path = os.path.join(self.output_folder, file_name)
+        else:
+            output_path = os.path.join("Data", file_name)
+        self.handler.save_data(output_path)
 
     def run_simulation(self):
         """
         Запуск основної симуляції.
         """
-        prepare_environment()
+        # Підготовка середовища для збереження
+        self.output_folder = DataHandler.prepare_environment(self.storage_mode)
+        
+        DataHandler.prepare_environment(self.storage_mode)
 
         # Генерація нормального потоку
         self.logger.log("Генерація нормального потоку...")
         self.pipeline.generate_normal_flow(time_steps=300, noise_level=0.01)
         self.handler.data = self.pipeline.data
-        self.handler.save_data("Data/Pipeline_Normal_Flow.csv")
+        self.save_data("Pipeline_Normal_Flow.csv")
 
         # Генерація події аварії
         self.logger.log("Генерація аварії...")
@@ -86,7 +96,7 @@ class Worker:
         )
 
         # Збереження даних у файл
-        self.handler.save_data("Data/Pipeline_Event_Simulation.csv")
+        self.save_data("Pipeline_Event_Simulation.csv")
 
         # Візуалізація
         visualizer = Visualization(self.handler)
@@ -95,5 +105,5 @@ class Worker:
         self.logger.log("Симуляція завершена.")
 
 if __name__ == "__main__":
-    worker = Worker()
+    worker = Worker(storage_mode="separate")
     worker.run_simulation()

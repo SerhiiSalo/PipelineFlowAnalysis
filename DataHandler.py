@@ -1,4 +1,6 @@
 import pandas as pd
+import os
+import time
 
 class DataHandler:
     """
@@ -40,3 +42,20 @@ class DataHandler:
             print(f"Файл {file_name} порожній. Завантаження неможливе.")  # Повідомлення про порожній файл
         except Exception as e:
             print(f"Сталася помилка при завантаженні даних: {e}")  # Вивід будь-яких інших помилок
+
+    def prepare_environment(storage_mode, base_path="Data"):
+        """
+        Підготовка середовища для зберігання даних симуляції.
+        """
+        if storage_mode == "overwrite":
+            if not os.path.exists(base_path):
+                os.mkdir(base_path)
+            else:
+                for file in os.listdir(base_path):
+                    os.remove(os.path.join(base_path, file))
+        elif storage_mode == "separate":
+            output_folder = f"{base_path}/Training_{time.strftime('%Y%m%d_%H%M%S')}"
+            if not os.path.exists(output_folder):  # Перевірка існування папки
+                os.mkdir(output_folder)
+            return output_folder
+        return base_path
