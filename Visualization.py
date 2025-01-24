@@ -42,8 +42,8 @@ class Visualization:
         for sensor in sensors:
             deltas = self.data_handler.data[f"Pressure_{sensor}m"].diff().fillna(0)
             plt.plot(self.data_handler.data["Time"], deltas, label=f"Дельта тиску на {sensor} м")
-            plt.axhline(0.04, color='red', linestyle='--', label="Поріг аномалій")
-            plt.axhline(-0.04, color='red', linestyle='--')
+            plt.axhline(0.02, color='red', linestyle='--', label="Поріг аномалій")
+            plt.axhline(-0.02, color='red', linestyle='--')
         plt.title("Дельта тиску у часі")
         plt.xlabel("Час")
         plt.ylabel("Дельта тиску (атм)")
@@ -51,4 +51,4 @@ class Visualization:
         plt.grid()
 
         plt.tight_layout()
-        plt.show()
+        plt.show(block=True)
