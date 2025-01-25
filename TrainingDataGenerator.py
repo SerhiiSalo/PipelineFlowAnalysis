@@ -61,44 +61,39 @@ class TrainingDataGenerator:
         """
         self.logger.log("Початок генерації навчальних даних...")
 
-        # Генерація нормального потоку
-        self.output_folder = DataHandler.prepare_environment(self.storage_mode)  # Папка для нормальних даних
-        normal_steps = int(total_steps * (1 - anomaly_ratio))
-        self.logger.log(f"Генерація {normal_steps} нормальних часових кроків...")
-        self.pipeline.generate_normal_flow(time_steps=normal_steps, noise_level=0.01)
-        self.handler.data = self.pipeline.data
-        self.save_data("Training_Data.csv")
-
-        # Генерація аномальних даних
-        anomaly_steps = total_steps - normal_steps
-        self.logger.log(f"Генерація {anomaly_steps} аномальних часових кроків...")
-
-        for _ in range(anomaly_steps):
-            # Створення окремої папки для кожної аномальної події
-            self.output_folder = DataHandler.prepare_environment(self.storage_mode)
-            
-            event_generator = EventGenerator(
-                pipeline_length=self.pipeline_length,
-                sensors=self.sensors,
-                min_distance_from_sensors=5000,
-                logger=self.logger
-            )
-            event_position = event_generator.generate_event_position()
-            time_of_event = random.randint(20, 50)
-
-            simulator = PressureWaveSimulator(
-                self.handler,
-                sensors=self.sensors,
-                wave_speed=1000,
-                pump_positions=[250_000],
-                logger=self.logger
-            )
-            simulator.apply_long_term_failure(
-                event_position=event_position,
-                pressure_decrease_rate=0.1,
-                time_of_event=time_of_event
-            )
+        for curent_step in range(total_steps):
+            is_anomaly_data = self.handler.random_boolean()
+            # Генерація нормального потоку
+            self.output_folder = DataHandler.prepare_environment(self.storage_mode, "Data", curent_step, is_anomaly_data)  # Папка для нормальних даних
+            self.pipeline.generate_normal_flow(time_steps=300, noise_level=0.01)
+            self.handler.data = self.pipeline.data
             self.save_data("Training_Data.csv")
+
+            # Генерація аномальних даних
+            if is_anomaly_data:
+                event_generator = EventGenerator(
+                    pipeline_length=self.pipeline_length,
+                    sensors=self.sensors,
+                    min_distance_from_sensors=5000,
+                    logger=self.logger
+                )
+                event_position = event_generator.generate_event_position()
+                time_of_event = random.randint(20, 50)
+
+                simulator = PressureWaveSimulator(
+                    self.handler,
+                    sensors=self.sensors,
+                    wave_speed=1000,
+                    pump_positions=[250_000],
+                    logger=self.logger
+                )
+                simulator.apply_long_term_failure(
+                    event_position=event_position,
+                    pressure_decrease_rate=0.1,
+                    time_of_event=time_of_event
+                )
+                self.save_data("Training_Data.csv")
+                
 
         self.logger.log("Навчальні дані згенеровано.")
 
@@ -107,5 +102,6 @@ class TrainingDataGenerator:
 if __name__ == "__main__":
     logger = Logger("training_data_log.txt")
     sensors = [0, 100_000, 250_000, 300_000]
-    generator = TrainingDataGenerator(pipeline_length=300_000, sensors=sensors, logger=logger, storage_mode="append")
-    generator.generate_training_data(total_steps=10000, anomaly_ratio=0.2)
+    generator = TrainingDataGenerator(pipeline_length=300_000, sensors=sensors, logger=logger, storage_mode="separate")
+    #generator.generate_training_data(total_steps=10000, anomaly_ratio=0.2)
+    generator.generate_training_data(total_steps=100, anomaly_ratio=0.2)

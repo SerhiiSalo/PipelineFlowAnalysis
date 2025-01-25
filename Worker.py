@@ -35,7 +35,7 @@ class Worker:
         self.storage_mode = storage_mode
 
 
-    def save_data(self, file_name):
+    def save_data(self, data, file_name):
         """
         Зберігає дані в залежності від обраного режиму.
         """
@@ -43,9 +43,29 @@ class Worker:
             output_path = os.path.join(self.output_folder, file_name)
         else:
             output_path = os.path.join("Data", file_name)
+        self.handler.data = data
         self.handler.save_data(output_path)
 
-    def run_simulation(self):
+    def visualize_file(self, file_path):
+        """
+        Метод для візуалізації даних із заданого файлу.
+
+        Parameters:
+        - file_path: шлях до файлу (або повний, або відносний від каталогу Data).
+        """
+        if not os.path.exists(file_path):
+            file_path = os.path.join("Data", file_path)
+            if not os.path.exists(file_path):
+                self.logger.log(f"Файл {file_path} не знайдено.")
+                return
+
+        self.logger.log(f"Завантаження даних із файлу {file_path}...")
+        self.handler.load_data(file_path)
+        visualizer = Visualization(self.handler)
+        visualizer.plot_data(self.sensors)
+        self.logger.log(f"Візуалізація завершена для файлу {file_path}.")
+
+    def create_normal_data(self):
         """
         Запуск основної симуляції.
         """
@@ -57,8 +77,14 @@ class Worker:
         # Генерація нормального потоку
         self.logger.log("Генерація нормального потоку...")
         self.pipeline.generate_normal_flow(time_steps=300, noise_level=0.01)
-        self.handler.data = self.pipeline.data
-        self.save_data("Pipeline_Normal_Flow.csv")
+        return self.pipeline.data
+    
+
+  
+
+    def run_simulation(self):
+        self.handler.data = self.create_normal_data()
+        self.save_data(self.handler.data, "Pipeline_Normal_Flow.csv")
 
         # Генерація події аварії
         self.logger.log("Генерація аварії...")
@@ -78,9 +104,6 @@ class Worker:
         time_of_event = random.randint(20, 50)
         self.logger.log(f"Час аварії: {time_of_event} секунд.")
 
-        # Завантаження даних
-        self.handler.load_data("Data/Pipeline_Normal_Flow.csv")
-
         # Моделювання аварії
         simulator = PressureWaveSimulator(
             self.handler,
@@ -96,7 +119,7 @@ class Worker:
         )
 
         # Збереження даних у файл
-        self.save_data("Pipeline_Event_Simulation.csv")
+        self.save_data(self.handler.data, "Training_Data.csv")
 
         # Візуалізація
         visualizer = Visualization(self.handler)
@@ -106,4 +129,5 @@ class Worker:
 
 if __name__ == "__main__":
     worker = Worker(storage_mode="separate")
-    worker.run_simulation()
+    #worker.run_simulation()
+    worker.visualize_file(file_path="Training_A_20250125_112406_12/Training_Data.csv")

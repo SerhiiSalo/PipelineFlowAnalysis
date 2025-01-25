@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 import time
+import random
 
 class DataHandler:
     """
@@ -43,7 +44,7 @@ class DataHandler:
         except Exception as e:
             print(f"Сталася помилка при завантаженні даних: {e}")  # Вивід будь-яких інших помилок
 
-    def prepare_environment(storage_mode, base_path="Data"):
+    def prepare_environment(storage_mode, base_path="Data", index_of_step="0", is_anomaly_data = True):
         """
         Підготовка середовища для зберігання даних симуляції.
         """
@@ -54,8 +55,12 @@ class DataHandler:
                 for file in os.listdir(base_path):
                     os.remove(os.path.join(base_path, file))
         elif storage_mode == "separate":
-            output_folder = f"{base_path}/Training_{time.strftime('%Y%m%d_%H%M%S')}"
+            output_folder = f"{base_path}/Training_{'A' if is_anomaly_data else "N"}_{time.strftime('%Y%m%d_%H%M%S')}_{index_of_step}"
             if not os.path.exists(output_folder):  # Перевірка існування папки
                 os.mkdir(output_folder)
             return output_folder
         return base_path
+    
+    def random_boolean(self):
+        random_number = random.randint(1, 15)
+        return random_number % 4 == 0
