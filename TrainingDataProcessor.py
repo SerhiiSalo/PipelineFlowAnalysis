@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
 
 class TrainingDataProcessor:
     def __init__(self):
@@ -74,7 +75,13 @@ class TrainingDataProcessor:
         X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42)
 
         return X_train, y_train, X_val, y_val, X_test, y_test
-
+    
+    def normalize_data(self, data):
+        feature_columns = [col for col in data.columns if col not in ["Time", "label"]]
+        scaler = MinMaxScaler()
+        data[feature_columns] = scaler.fit_transform(data[feature_columns])
+        return data, scaler
+    
 if __name__ == "__main__":
     processor = TrainingDataProcessor()
     base_directory = "Data"
@@ -84,6 +91,12 @@ if __name__ == "__main__":
     merged_data = processor.merge_and_label_from_directories(base_directory)
     print("Дані успішно об'єднано.")
 
-    print("Зберігання об'єднаних даних...")
-    processor.save_merged_data(merged_data, output_file)
+    print("Нормалізація даних...")
+    normalized_data, scaler = processor.normalize_data(merged_data)
+    print("Дані успішно нормалізовано.")
+
+
+
+    print("Зберігання нормалізованих даних...")
+    processor.save_merged_data(normalized_data, output_file)
     print("Процес завершено.")
