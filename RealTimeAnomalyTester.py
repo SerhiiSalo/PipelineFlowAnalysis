@@ -34,7 +34,7 @@ class RealTimeAnomalyTester:
 
 if __name__ == "__main__":
     model_path = "lstm_anomaly_detector.pth"
-    test_file_path = "Data/Training_A_20250125_182449_29/Training_Data.csv"
+    test_file_path = "Data/Training_A_20250125_182508_864/Training_Data.csv"
 
     tester = RealTimeAnomalyTester(model_path, threshold=0.5)
     tester.test_file(test_file_path)
