@@ -104,4 +104,4 @@ if __name__ == "__main__":
     sensors = [0, 100_000, 250_000, 300_000]
     generator = TrainingDataGenerator(pipeline_length=300_000, sensors=sensors, logger=logger, storage_mode="separate")
     #generator.generate_training_data(total_steps=10000, anomaly_ratio=0.2)
-    generator.generate_training_data(total_steps=100, anomaly_ratio=0.2)
+    generator.generate_training_data(total_steps=1000, anomaly_ratio=0.2)
