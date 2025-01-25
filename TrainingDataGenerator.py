@@ -107,5 +107,5 @@ class TrainingDataGenerator:
 if __name__ == "__main__":
     logger = Logger("training_data_log.txt")
     sensors = [0, 100_000, 250_000, 300_000]
-    generator = TrainingDataGenerator(pipeline_length=300_000, sensors=sensors, logger=logger, storage_mode="separate")
+    generator = TrainingDataGenerator(pipeline_length=300_000, sensors=sensors, logger=logger, storage_mode="append")
     generator.generate_training_data(total_steps=10000, anomaly_ratio=0.2)
